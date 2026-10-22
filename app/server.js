@@ -85,6 +85,56 @@ app.get('/api/members', async (_req, res, next) => {
   } catch (error) { next(error); }
 });
 
+const memberPayload = (body) => {
+  const fullName = typeof body.full_name === 'string' ? body.full_name.trim() : '';
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!fullName || fullName.length > 120 || !validEmail || email.length > 180) return null;
+  return { fullName, email };
+};
+
+app.post('/api/members', async (req, res, next) => {
+  try {
+    const member = memberPayload(req.body);
+    if (!member) return res.status(400).json({ error: 'Họ tên hoặc email không hợp lệ' });
+    const result = await pool.query(
+      'INSERT INTO members (full_name, email) VALUES ($1, $2) RETURNING id, full_name, email',
+      [member.fullName, member.email]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    if (error.code === '23505') return res.status(409).json({ error: 'Email đã được sử dụng' });
+    next(error);
+  }
+});
+
+app.put('/api/members/:id', async (req, res, next) => {
+  try {
+    const id = asId(req.params.id);
+    const member = memberPayload(req.body);
+    if (!id || !member) return res.status(400).json({ error: 'Thông tin thành viên không hợp lệ' });
+    const result = await pool.query(
+      'UPDATE members SET full_name=$1, email=$2 WHERE id=$3 RETURNING id, full_name, email',
+      [member.fullName, member.email, id]
+    );
+    if (!result.rowCount) return res.status(404).json({ error: 'Không tìm thấy thành viên' });
+    res.json(result.rows[0]);
+  } catch (error) {
+    if (error.code === '23505') return res.status(409).json({ error: 'Email đã được sử dụng' });
+    next(error);
+  }
+});
+
+app.delete('/api/members/:id', async (req, res, next) => {
+  try {
+    const id = asId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+    const result = await pool.query('DELETE FROM members WHERE id=$1 RETURNING id', [id]);
+    if (!result.rowCount) return res.status(404).json({ error: 'Không tìm thấy thành viên' });
+    res.status(204).end();
+  } catch (error) { next(error); }
+});
+
 app.get('/api/tasks', async (req, res, next) => {
   try {
     const values = [];

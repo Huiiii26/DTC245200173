@@ -67,6 +67,11 @@
       "type":"timeseries","title":"CPU và RAM máy chủ","id":12,"datasource":{"type":"prometheus","uid":"prometheus"},
       "targets":[{"expr":"100 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100","legendFormat":"CPU %","refId":"A"},{"expr":"(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100","legendFormat":"RAM %","refId":"B"}],
       "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":20}
+    },
+    {
+      "type":"logs","title":"Log lỗi ứng dụng và Nginx","id":13,"datasource":{"type":"loki","uid":"loki"},
+      "targets":[{"expr":"{service=~\"app|nginx\"} |~ `(?i)(error|warn| 4[0-9]{2} | 5[0-9]{2} )`","refId":"A"}],
+      "options":{"showTime":true,"showLabels":true,"wrapLogMessage":true,"sortOrder":"Descending"},"gridPos":{"h":9,"w":24,"x":0,"y":28}
     }
   ],
   "refresh":"15s",

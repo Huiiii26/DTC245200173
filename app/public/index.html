@@ -3,39 +3,71 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Task Tracker</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>TaskFlow · Quản lý công việc</title>
+  <link rel="stylesheet" href="/style.css?v=6">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">ĐỀ 24 · QUẢN LÝ CÔNG VIỆC</p>
-      <h1>Task Tracker</h1>
-      <p class="subtitle">Theo dõi công việc, thời hạn và tiến độ của nhóm tại một nơi.</p>
-    </div>
-    <button id="newTask" class="primary">+ Thêm công việc</button>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>TaskFlow</strong>
+      </div>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="#overview">Tổng quan</a>
+        <a href="#tasks" class="active">Công việc</a>
+        <a href="#team">Thành viên</a>
+      </nav>
+    </aside>
 
-  <main>
-    <section id="stats" class="stats" aria-label="Thống kê công việc"></section>
-    <section class="toolbar">
-      <label>Tìm kiếm <input id="search" type="search" placeholder="Nhập tiêu đề hoặc mô tả"></label>
-      <label>Trạng thái
-        <select id="statusFilter">
-          <option value="">Tất cả</option><option value="todo">Cần làm</option>
-          <option value="in_progress">Đang làm</option><option value="done">Hoàn thành</option>
-        </select>
-      </label>
-    </section>
-    <section id="board" class="board" aria-live="polite"></section>
-  </main>
+    <main class="content">
+      <section id="overviewView" class="view">
+        <h1 class="view-title">Tổng quan</h1>
+        <div id="overviewStats" class="summary-grid"></div>
+        <div class="panel simple-panel">
+          <h2>Công việc gần đây</h2>
+          <div id="recentTasks" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="tasksView" class="view active">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="toolbar">
+              <label class="search-box"><span>⌕</span><input id="search" type="search" placeholder="Tìm công việc..."></label>
+              <label class="select-wrap"><span class="sr-only">Trạng thái</span>
+                <select id="statusFilter">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="todo">Cần làm</option>
+                  <option value="in_progress">Đang làm</option>
+                  <option value="done">Hoàn thành</option>
+                </select>
+              </label>
+              <button id="newTask" class="primary">＋ Thêm công việc</button>
+            </div>
+          </div>
+          <div id="board" class="table-wrap" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="teamView" class="view">
+        <h1 class="view-title">Thành viên</h1>
+        <div class="panel simple-panel">
+          <div class="section-head"><h2>Danh sách thành viên</h2><button id="newMember" class="primary">＋ Thêm thành viên</button></div>
+          <div id="memberList" class="table-wrap"></div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <dialog id="taskDialog">
     <form id="taskForm">
-      <div class="dialog-head"><h2 id="dialogTitle">Thêm công việc</h2><button type="button" id="closeDialog" class="icon">×</button></div>
+      <div class="dialog-head">
+        <div><p class="eyebrow">THÔNG TIN CÔNG VIỆC</p><h2 id="dialogTitle">Thêm công việc</h2></div>
+        <button type="button" id="closeDialog" class="icon" aria-label="Đóng">×</button>
+      </div>
       <input type="hidden" id="taskId">
-      <label>Tiêu đề <input id="title" maxlength="200" required></label>
-      <label>Mô tả <textarea id="description" maxlength="2000" rows="4"></textarea></label>
+      <label>Tiêu đề <input id="title" maxlength="200" placeholder="Ví dụ: Hoàn thiện báo cáo" required></label>
+      <label>Mô tả <textarea id="description" maxlength="2000" rows="4" placeholder="Mô tả nội dung cần thực hiện"></textarea></label>
       <div class="grid-two">
         <label>Hạn hoàn thành <input id="deadline" type="date"></label>
         <label>Người phụ trách <select id="assignee"></select></label>
@@ -46,7 +78,20 @@
       <div class="actions"><button type="button" id="cancelDialog">Hủy</button><button class="primary" type="submit">Lưu công việc</button></div>
     </form>
   </dialog>
-  <script src="/app.js" defer></script>
+
+  <dialog id="memberDialog">
+    <form id="memberForm">
+      <div class="dialog-head">
+        <div><p class="eyebrow">THÔNG TIN THÀNH VIÊN</p><h2 id="memberDialogTitle">Thêm thành viên</h2></div>
+        <button type="button" id="closeMemberDialog" class="icon" aria-label="Đóng">×</button>
+      </div>
+      <input type="hidden" id="memberId">
+      <label>Họ và tên <input id="memberName" maxlength="120" placeholder="Ví dụ: Nguyễn Văn An" required></label>
+      <label>Email <input id="memberEmail" type="email" maxlength="180" placeholder="an@example.com" required></label>
+      <p id="memberError" class="error" role="alert"></p>
+      <div class="actions"><button type="button" id="cancelMemberDialog">Hủy</button><button class="primary" type="submit">Lưu thành viên</button></div>
+    </form>
+  </dialog>
+  <script src="/app.js?v=6" defer></script>
 </body>
 </html>
-

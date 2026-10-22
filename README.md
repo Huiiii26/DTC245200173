@@ -10,18 +10,36 @@
 - Prometheus, Grafana, cAdvisor, node-exporter, nginx-exporter và postgres-exporter.
 - Loki và Promtail cho log tập trung.
 
-## Chuẩn bị WSL2 Ubuntu
+## Chuẩn bị WSL2 Ubuntu không dùng Docker Desktop
+
+Mở PowerShell bằng quyền Administrator:
+
+```powershell
+wsl --install -d Ubuntu
+wsl --set-default-version 2
+```
+
+Khởi động lại Windows nếu được yêu cầu, mở ứng dụng Ubuntu và tạo user Linux. Sau đó chạy trong Ubuntu:
 
 ```bash
 sudo apt update
 sudo apt install -y git openssl ca-certificates curl
-curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker "$USER"
-newgrp docker
+git clone https://github.com/DTC245200173/DTC245200173.git ~/task-tracker
+cd ~/task-tracker
+chmod +x scripts/*.sh postgres/init/*.sh
+./scripts/install-docker-ubuntu.sh
+```
+
+Đóng Ubuntu, chạy `wsl --shutdown` trong PowerShell rồi mở Ubuntu lại. Kiểm tra:
+
+```bash
+cd ~/task-tracker
+sudo service docker start
+docker version
 docker compose version
 ```
 
-Nên đặt repository trong hệ thống tệp Linux, ví dụ `~/task-tracker`, thay vì `/mnt/c` hoặc `/mnt/d` để tránh chậm I/O và lỗi quyền.
+Repository phải nằm trong hệ thống tệp Linux (`~/task-tracker`), không chạy trực tiếp từ `/mnt/c` hoặc `/mnt/d`, để tránh chậm I/O và lỗi quyền. Dự án sử dụng Docker Engine cài trực tiếp trong Ubuntu, không phụ thuộc Docker Desktop.
 
 ## Khởi chạy
 
@@ -33,6 +51,7 @@ chmod +x scripts/*.sh postgres/init/*.sh
 ./scripts/gen-cert.sh
 docker compose up -d --build
 docker compose ps
+./scripts/verify-system.sh
 ```
 
 Địa chỉ truy cập:
@@ -80,6 +99,37 @@ docker compose logs --tail=30 prometheus grafana
 ```
 
 Các biểu đồ chính gồm trạng thái dịch vụ, CPU/RAM container, CPU/RAM máy chủ, request HTTP theo status, độ trễ p95, kết nối và giao dịch PostgreSQL. Prometheus cũng có cảnh báo khi dịch vụ ngừng, tỷ lệ HTTP 5xx cao hoặc xuất hiện công việc quá hạn.
+
+## Log tập trung với Loki và Promtail
+
+Promtail tự phát hiện các container thuộc project `tasktracker` qua Docker socket chỉ đọc, bóc lớp log Docker, gắn nhãn `service`, `container`, `stream`, `level`, `status` rồi gửi tới Loki. Loki lưu dữ liệu bảy ngày. Truy vấn tại Grafana → Explore → chọn datasource Loki.
+
+```logql
+# 1. Toàn bộ log của ứng dụng trong 30 phút gần nhất
+{service="app"}
+
+# 2. Log lỗi hoặc cảnh báo của ứng dụng
+{service="app"} | json | level=~"error|warn"
+
+# 3. Request lỗi 4xx và 5xx qua Nginx
+{service="nginx"} | json | status >= 400
+
+# 4. Tìm thao tác tạo, sửa hoặc xóa công việc
+{service="app"} |~ "POST|PUT|DELETE"
+
+# 5. Năm URL được truy cập nhiều nhất trong 15 phút
+topk(5, sum by (path) (count_over_time({service="app"} | json | __error__="" [15m])))
+```
+
+Tạo dữ liệu demo và kiểm tra:
+
+```bash
+curl -k https://localhost/api/tasks
+curl -k https://localhost/khong-ton-tai
+docker compose logs --tail=30 promtail loki
+```
+
+Panel `Log lỗi ứng dụng và Nginx` được provision sẵn trong dashboard Grafana.
 
 ## Hardening đã áp dụng
 
