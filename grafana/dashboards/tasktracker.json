@@ -1,0 +1,82 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat", "title": "Ứng dụng", "id": 1, "datasource": {"type":"prometheus","uid":"prometheus"},
+      "targets": [{"expr":"up{job=\"tasktracker-app\"}","refId":"A"}],
+      "fieldConfig": {"defaults":{"mappings":[{"type":"value","options":{"0":{"text":"NGỪNG","color":"red"},"1":{"text":"HOẠT ĐỘNG","color":"green"}}}],"thresholds":{"mode":"absolute","steps":[{"color":"red","value":null},{"color":"green","value":1}]}},"overrides":[]},
+      "options":{"colorMode":"background","graphMode":"none","justifyMode":"center"}, "gridPos":{"h":4,"w":4,"x":0,"y":0}
+    },
+    {
+      "type":"stat","title":"Nginx","id":2,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"up{job=\"nginx\"}","refId":"A"}],
+      "fieldConfig":{"defaults":{"mappings":[{"type":"value","options":{"0":{"text":"NGỪNG","color":"red"},"1":{"text":"HOẠT ĐỘNG","color":"green"}}}],"thresholds":{"mode":"absolute","steps":[{"color":"red","value":null},{"color":"green","value":1}]}},"overrides":[]},
+      "options":{"colorMode":"background","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":4,"y":0}
+    },
+    {
+      "type":"stat","title":"PostgreSQL","id":3,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"up{job=\"postgres\"}","refId":"A"}],
+      "fieldConfig":{"defaults":{"mappings":[{"type":"value","options":{"0":{"text":"NGỪNG","color":"red"},"1":{"text":"HOẠT ĐỘNG","color":"green"}}}],"thresholds":{"mode":"absolute","steps":[{"color":"red","value":null},{"color":"green","value":1}]}},"overrides":[]},
+      "options":{"colorMode":"background","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":8,"y":0}
+    },
+    {
+      "type":"stat","title":"Công việc quá hạn","id":4,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"tasktracker_overdue_tasks","refId":"A"}],
+      "fieldConfig":{"defaults":{"thresholds":{"mode":"absolute","steps":[{"color":"green","value":null},{"color":"red","value":1}]}},"overrides":[]},
+      "options":{"colorMode":"value","graphMode":"area"},"gridPos":{"h":4,"w":4,"x":12,"y":0}
+    },
+    {
+      "type":"stat","title":"Container đang chạy","id":5,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"count(container_last_seen{name!=\"\"})","refId":"A"}],
+      "options":{"colorMode":"value","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":16,"y":0}
+    },
+    {
+      "type":"stat","title":"Kết nối PostgreSQL","id":6,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"sum(pg_stat_activity_count{datname=\"tasktracker\"})","refId":"A"}],
+      "options":{"colorMode":"value","graphMode":"area"},"gridPos":{"h":4,"w":4,"x":20,"y":0}
+    },
+    {
+      "type":"timeseries","title":"CPU container theo dịch vụ","id":7,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"sum by (name) (rate(container_cpu_usage_seconds_total{name!=\"\"}[1m])) * 100","legendFormat":"{{name}}","refId":"A"}],
+      "fieldConfig":{"defaults":{"unit":"percent","min":0},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":4}
+    },
+    {
+      "type":"timeseries","title":"Bộ nhớ container","id":8,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"container_memory_working_set_bytes{name!=\"\"}","legendFormat":"{{name}}","refId":"A"}],
+      "fieldConfig":{"defaults":{"unit":"bytes"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":4}
+    },
+    {
+      "type":"timeseries","title":"Lưu lượng HTTP theo mã trạng thái","id":9,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"sum by (status_code) (rate(tasktracker_http_request_duration_seconds_count[5m]))","legendFormat":"HTTP {{status_code}}","refId":"A"}],
+      "fieldConfig":{"defaults":{"unit":"reqps"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":12}
+    },
+    {
+      "type":"timeseries","title":"Độ trễ HTTP p95","id":10,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"histogram_quantile(0.95, sum by (le) (rate(tasktracker_http_request_duration_seconds_bucket[5m])))","legendFormat":"p95","refId":"A"}],
+      "fieldConfig":{"defaults":{"unit":"s"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":12}
+    },
+    {
+      "type":"timeseries","title":"Giao dịch PostgreSQL","id":11,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"rate(pg_stat_database_xact_commit{datname=\"tasktracker\"}[5m])","legendFormat":"commit/s","refId":"A"},{"expr":"rate(pg_stat_database_xact_rollback{datname=\"tasktracker\"}[5m])","legendFormat":"rollback/s","refId":"B"}],
+      "fieldConfig":{"defaults":{"unit":"ops"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":20}
+    },
+    {
+      "type":"timeseries","title":"CPU và RAM máy chủ","id":12,"datasource":{"type":"prometheus","uid":"prometheus"},
+      "targets":[{"expr":"100 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100","legendFormat":"CPU %","refId":"A"},{"expr":"(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100","legendFormat":"RAM %","refId":"B"}],
+      "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":20}
+    }
+  ],
+  "refresh":"15s",
+  "schemaVersion":40,
+  "tags":["task-tracker","docker"],
+  "templating":{"list":[]},
+  "time":{"from":"now-1h","to":"now"},
+  "timezone":"browser",
+  "title":"Task Tracker - Giám sát hệ thống",
+  "uid":"tasktracker-overview",
+  "version":1
+}
+

@@ -1,0 +1,25 @@
+groups:
+  - name: tasktracker
+    rules:
+      - alert: DichVuNgungHoatDong
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Dịch vụ {{ $labels.job }} không phản hồi"
+      - alert: TyLeLoiHttpCao
+        expr: sum(rate(tasktracker_http_request_duration_seconds_count{status_code=~"5.."}[5m])) / clamp_min(sum(rate(tasktracker_http_request_duration_seconds_count[5m])), 0.001) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tỷ lệ lỗi HTTP 5xx vượt 5 phần trăm"
+      - alert: CoCongViecQuaHan
+        expr: tasktracker_overdue_tasks > 0
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Hệ thống có công việc quá hạn"
+

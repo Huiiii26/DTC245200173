@@ -26,7 +26,7 @@ Nên đặt repository trong hệ thống tệp Linux, ví dụ `~/task-tracker`
 ## Khởi chạy
 
 ```bash
-git clone https://github.com/<MSSV>/<MSSV>.git task-tracker
+git clone https://github.com/DTC245200173/DTC245200173.git task-tracker
 cd task-tracker
 chmod +x scripts/*.sh postgres/init/*.sh
 ./scripts/gen-env.sh
@@ -69,11 +69,23 @@ docker compose logs --tail=50 app nginx postgres
 
 Kết quả mong đợi: health trả về `database: connected`, app chạy bằng user `node`, Nginx chạy bằng user không phải root, header phản hồi có CSP, HSTS và `X-Content-Type-Options`.
 
+## Giám sát bằng Prometheus và Grafana
+
+Prometheus thu thập metrics 15 giây một lần từ sáu nguồn: ứng dụng, Nginx, PostgreSQL, cAdvisor, node-exporter và chính Prometheus. Dashboard `Task Tracker - Giám sát hệ thống` được Grafana nạp tự động, không cần import thủ công.
+
+```bash
+curl http://127.0.0.1:9090/-/healthy
+curl http://127.0.0.1:9090/api/v1/targets
+docker compose logs --tail=30 prometheus grafana
+```
+
+Các biểu đồ chính gồm trạng thái dịch vụ, CPU/RAM container, CPU/RAM máy chủ, request HTTP theo status, độ trễ p95, kết nối và giao dịch PostgreSQL. Prometheus cũng có cảnh báo khi dịch vụ ngừng, tỷ lệ HTTP 5xx cao hoặc xuất hiện công việc quá hạn.
+
 ## Hardening đã áp dụng
 
 - Container ứng dụng và Nginx chạy non-root, `no-new-privileges`, bỏ toàn bộ Linux capabilities, root filesystem chỉ đọc và `/tmp` dùng `tmpfs`.
 - Tách mạng `frontend`, `backend`, `monitoring`; `backend` là mạng nội bộ. PostgreSQL không mở cổng ra ngoài.
-- User ứng dụng PostgreSQL chỉ có quyền SELECT, INSERT, UPDATE, DELETE và không có quyền tạo DB/role hay superuser.
+- User ứng dụng PostgreSQL chỉ có quyền SELECT, INSERT, UPDATE, DELETE; user exporter chỉ có role `pg_monitor`. Cả hai đều không có quyền tạo DB/role hay superuser.
 - Mật khẩu ngẫu nhiên nằm trong `.env` quyền 600; `.env` và khóa TLS không commit lên Git.
 - Nginx bật HTTPS, CSP, HSTS, chống MIME sniffing, hạn chế iframe và rate limit API.
 - Image được ghim phiên bản, container có giới hạn bộ nhớ, healthcheck và xoay vòng log.
@@ -95,6 +107,6 @@ docker compose down -v
 ## Thông tin sinh viên
 
 - Họ và tên: `<ĐIỀN HỌ TÊN>`
-- Mã số sinh viên: `<ĐIỀN MSSV>`
-- Repository GitHub: `https://github.com/<MSSV>/<MSSV>`
+- Mã số sinh viên: `DTC245200173`
+- Repository GitHub dự kiến: `https://github.com/DTC245200173/DTC245200173`
 
