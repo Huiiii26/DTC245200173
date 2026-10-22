@@ -1,0 +1,10 @@
+.env
+nginx/certs/*.crt
+nginx/certs/*.key
+!nginx/certs/.gitkeep
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+bao-cao/rendered/
+

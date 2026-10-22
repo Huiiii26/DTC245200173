@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Task Tracker</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">ĐỀ 24 · QUẢN LÝ CÔNG VIỆC</p>
+      <h1>Task Tracker</h1>
+      <p class="subtitle">Theo dõi công việc, thời hạn và tiến độ của nhóm tại một nơi.</p>
+    </div>
+    <button id="newTask" class="primary">+ Thêm công việc</button>
+  </header>
+
+  <main>
+    <section id="stats" class="stats" aria-label="Thống kê công việc"></section>
+    <section class="toolbar">
+      <label>Tìm kiếm <input id="search" type="search" placeholder="Nhập tiêu đề hoặc mô tả"></label>
+      <label>Trạng thái
+        <select id="statusFilter">
+          <option value="">Tất cả</option><option value="todo">Cần làm</option>
+          <option value="in_progress">Đang làm</option><option value="done">Hoàn thành</option>
+        </select>
+      </label>
+    </section>
+    <section id="board" class="board" aria-live="polite"></section>
+  </main>
+
+  <dialog id="taskDialog">
+    <form id="taskForm">
+      <div class="dialog-head"><h2 id="dialogTitle">Thêm công việc</h2><button type="button" id="closeDialog" class="icon">×</button></div>
+      <input type="hidden" id="taskId">
+      <label>Tiêu đề <input id="title" maxlength="200" required></label>
+      <label>Mô tả <textarea id="description" maxlength="2000" rows="4"></textarea></label>
+      <div class="grid-two">
+        <label>Hạn hoàn thành <input id="deadline" type="date"></label>
+        <label>Người phụ trách <select id="assignee"></select></label>
+        <label>Trạng thái <select id="taskStatus"><option value="todo">Cần làm</option><option value="in_progress">Đang làm</option><option value="done">Hoàn thành</option></select></label>
+        <label>Ưu tiên <select id="priority"><option value="low">Thấp</option><option value="medium">Trung bình</option><option value="high">Cao</option></select></label>
+      </div>
+      <p id="formError" class="error" role="alert"></p>
+      <div class="actions"><button type="button" id="cancelDialog">Hủy</button><button class="primary" type="submit">Lưu công việc</button></div>
+    </form>
+  </dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>
+
