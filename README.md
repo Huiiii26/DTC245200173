@@ -156,7 +156,7 @@ docker compose down -v
 
 ## Thông tin sinh viên
 
-- Họ và tên: `<ĐIỀN HỌ TÊN>`
+- Họ và tên: `<Dương Quốc Huy>`
 - Mã số sinh viên: `DTC245200173`
 - Repository GitHub dự kiến: `https://github.com/DTC245200173/DTC245200173`
 
