@@ -12,13 +12,13 @@
     },
     {
       "type":"stat","title":"Nginx","id":2,"datasource":{"type":"prometheus","uid":"prometheus"},
-      "targets":[{"expr":"up{job=\"nginx\"}","refId":"A"}],
+      "targets":[{"expr":"(nginx_up{job=\"nginx\"} * on(job, instance) up{job=\"nginx\"}) or on(job, instance) (up{job=\"nginx\"} * 0)","refId":"A"}],
       "fieldConfig":{"defaults":{"mappings":[{"type":"value","options":{"0":{"text":"NGỪNG","color":"red"},"1":{"text":"HOẠT ĐỘNG","color":"green"}}}],"thresholds":{"mode":"absolute","steps":[{"color":"red","value":null},{"color":"green","value":1}]}},"overrides":[]},
       "options":{"colorMode":"background","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":4,"y":0}
     },
     {
       "type":"stat","title":"PostgreSQL","id":3,"datasource":{"type":"prometheus","uid":"prometheus"},
-      "targets":[{"expr":"up{job=\"postgres\"}","refId":"A"}],
+      "targets":[{"expr":"(pg_up{job=\"postgres\"} * on(job, instance) up{job=\"postgres\"}) or on(job, instance) (up{job=\"postgres\"} * 0)","refId":"A"}],
       "fieldConfig":{"defaults":{"mappings":[{"type":"value","options":{"0":{"text":"NGỪNG","color":"red"},"1":{"text":"HOẠT ĐỘNG","color":"green"}}}],"thresholds":{"mode":"absolute","steps":[{"color":"red","value":null},{"color":"green","value":1}]}},"overrides":[]},
       "options":{"colorMode":"background","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":8,"y":0}
     },
@@ -30,7 +30,7 @@
     },
     {
       "type":"stat","title":"Container đang chạy","id":5,"datasource":{"type":"prometheus","uid":"prometheus"},
-      "targets":[{"expr":"count(container_last_seen{name!=\"\"})","refId":"A"}],
+      "targets":[{"expr":"count(time() - container_last_seen{container_label_com_docker_compose_project=\"tasktracker\",container_label_com_docker_compose_service!=\"\"} < 60)","refId":"A"}],
       "options":{"colorMode":"value","graphMode":"none"},"gridPos":{"h":4,"w":4,"x":16,"y":0}
     },
     {
@@ -40,12 +40,12 @@
     },
     {
       "type":"timeseries","title":"CPU container theo dịch vụ","id":7,"datasource":{"type":"prometheus","uid":"prometheus"},
-      "targets":[{"expr":"sum by (name) (rate(container_cpu_usage_seconds_total{name!=\"\"}[1m])) * 100","legendFormat":"{{name}}","refId":"A"}],
+      "targets":[{"expr":"sum by (container_label_com_docker_compose_service) (rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"tasktracker\",container_label_com_docker_compose_service!=\"\"}[2m])) * 100","legendFormat":"{{container_label_com_docker_compose_service}}","refId":"A"}],
       "fieldConfig":{"defaults":{"unit":"percent","min":0},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":4}
     },
     {
       "type":"timeseries","title":"Bộ nhớ container","id":8,"datasource":{"type":"prometheus","uid":"prometheus"},
-      "targets":[{"expr":"container_memory_working_set_bytes{name!=\"\"}","legendFormat":"{{name}}","refId":"A"}],
+      "targets":[{"expr":"sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{container_label_com_docker_compose_project=\"tasktracker\",container_label_com_docker_compose_service!=\"\"})","legendFormat":"{{container_label_com_docker_compose_service}}","refId":"A"}],
       "fieldConfig":{"defaults":{"unit":"bytes"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":4}
     },
     {
@@ -82,6 +82,6 @@
   "timezone":"browser",
   "title":"Task Tracker - Giám sát hệ thống",
   "uid":"tasktracker-overview",
-  "version":1
+  "version":2
 }
 
